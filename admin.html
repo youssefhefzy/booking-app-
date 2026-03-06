@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#c9a84c" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Bookly — Admin Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── Admin-only extras ── */
+    .filter-bar {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+      align-items: center;
+    }
+    .filter-chip {
+      padding: 0.35rem 0.85rem;
+      border-radius: 100px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition);
+      letter-spacing: 0.04em;
+    }
+    .filter-chip:hover { border-color: var(--gold-dim); color: var(--text-primary); }
+    .filter-chip.active { background: var(--gold); color: #0c0c0c; border-color: var(--gold); }
+
+    .client-name { color: var(--text-primary); font-weight: 500; }
+    .action-btns { display: flex; gap: 0.4rem; }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-muted);
+    }
+    .empty-state p { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+    .live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--success);
+    }
+    .live-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    .admin-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    /* Login overlay */
+    #login-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 9000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 3rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: var(--shadow-card);
+    }
+    .login-card h2 { margin-bottom: 0.5rem; }
+    .login-card p  { margin-bottom: 2rem; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+<!-- ── Admin Login Overlay ──────────────────────────────────── -->
+<div id="login-overlay">
+  <div class="login-card">
+    <p class="section-title">Admin Access</p>
+    <h2 class="mb-1">Dashboard Login</h2>
+    <p class="text-muted">Enter the admin password to manage your bookings.</p>
+    <div class="form-group mb-2">
+      <label class="form-label">Password</label>
+      <input class="form-input" type="password" id="admin-password" placeholder="••••••••" />
+    </div>
+    <button class="btn btn--primary btn--full" id="btn-login">Sign In →</button>
+    <p class="text-sm text-muted mt-2" style="text-align:center;">
+      Default: <code style="color:var(--gold)">admin123</code> — change in admin.js
+    </p>
+  </div>
+</div>
+
+<!-- ── Admin Layout ─────────────────────────────────────────── -->
+<div class="admin-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="navbar__logo" style="font-size:1.25rem;">Book<span style="color:var(--gold)">ly</span></div>
+    <p class="text-sm text-muted mt-1">Admin Panel</p>
+
+    <nav class="sidebar__nav">
+      <div class="sidebar__item active" data-view="bookings">
+        <span class="sidebar__icon">📋</span> Bookings
+      </div>
+      <div class="sidebar__item" data-view="services">
+        <span class="sidebar__icon">🏷️</span> Services
+      </div>
+      <div class="sidebar__item" data-view="calendar">
+        <span class="sidebar__icon">📅</span> Calendar View
+      </div>
+    </nav>
+
+    <div style="margin-top:auto; padding-top:2rem;">
+      <a href="index.html" class="sidebar__item" style="color:var(--text-muted);">
+        <span class="sidebar__icon">←</span> Client View
+      </a>
+      <div class="sidebar__item" id="btn-logout">
+        <span class="sidebar__icon">🚪</span> Logout
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="admin-main">
+
+    <!-- ── BOOKINGS VIEW ──────────────────────────────────────── -->
+    <div id="view-bookings">
+      <div class="admin-header">
+        <div>
+          <p class="section-title">Management</p>
+          <h2>All Bookings</h2>
+          <div class="live-indicator mt-1">
+            <div class="live-dot"></div>
+            Live updates enabled
+          </div>
+        </div>
+        <div style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
+          <input class="form-input" type="search" id="search-input" placeholder="Search by name or email…" style="width:220px;" />
+          <input class="form-input" type="date" id="date-filter" style="width:170px;" />
+          <button class="btn btn--ghost btn--sm" id="btn-export">↓ Export CSV</button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row" id="stats-row">
+        <div class="card stat-card skeleton" style="height:96px;"></div>
+        <div class="card stat-card skeleton" style="height:96px;"></div>
+        <div class="card stat-card skeleton" style="height:96px;"></div>
+        <div class="card stat-card skeleton" style="height:96px;"></div>
+      </div>
+
+      <!-- Filter chips -->
+      <div class="filter-bar">
+        <span style="font-size:0.78rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted);">Status:</span>
+        <div class="filter-chip active" data-status="all">All</div>
+        <div class="filter-chip" data-status="pending">Pending</div>
+        <div class="filter-chip" data-status="confirmed">Confirmed</div>
+        <div class="filter-chip" data-status="completed">Completed</div>
+        <div class="filter-chip" data-status="cancelled">Cancelled</div>
+      </div>
+
+      <!-- Bookings table -->
+      <div class="card" style="padding:0; overflow:hidden;">
+        <div style="overflow-x:auto;">
+          <table class="bookings-table" id="bookings-table">
+            <thead>
+              <tr>
+                <th>Client</th>
+                <th>Service</th>
+                <th>Date &amp; Time</th>
+                <th>Status</th>
+                <th>Booked</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="bookings-tbody">
+              <tr><td colspan="6"><div class="skeleton" style="height:48px; margin:0.5rem;"></div></td></tr>
+              <tr><td colspan="6"><div class="skeleton" style="height:48px; margin:0.5rem;"></div></td></tr>
+              <tr><td colspan="6"><div class="skeleton" style="height:48px; margin:0.5rem;"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SERVICES VIEW ──────────────────────────────────────── -->
+    <div id="view-services" class="hidden">
+      <div class="admin-header">
+        <div>
+          <p class="section-title">Configuration</p>
+          <h2>Services</h2>
+        </div>
+      </div>
+      <div id="services-admin-list" class="grid-2"></div>
+    </div>
+
+    <!-- ── CALENDAR VIEW ─────────────────────────────────────── -->
+    <div id="view-calendar" class="hidden">
+      <div class="admin-header">
+        <div>
+          <p class="section-title">Schedule</p>
+          <h2>Calendar View</h2>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <button class="btn btn--ghost btn--sm" id="cal-admin-prev">‹ Prev</button>
+          <strong id="cal-admin-label" style="font-family:var(--font-display); min-width:160px; text-align:center;">—</strong>
+          <button class="btn btn--ghost btn--sm" id="cal-admin-next">Next ›</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="calendar-grid" style="grid-template-columns: repeat(7,1fr); gap:0;">
+          <div class="cal-day-name">Sun</div>
+          <div class="cal-day-name">Mon</div>
+          <div class="cal-day-name">Tue</div>
+          <div class="cal-day-name">Wed</div>
+          <div class="cal-day-name">Thu</div>
+          <div class="cal-day-name">Fri</div>
+          <div class="cal-day-name">Sat</div>
+        </div>
+        <div id="cal-admin-grid" style="display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-top:4px;"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── Booking Detail Modal ─────────────────────────────────── -->
+<div id="modal-overlay" class="hidden" style="
+  position:fixed; inset:0; background:rgba(0,0,0,0.7);
+  backdrop-filter:blur(4px); z-index:500;
+  display:flex; align-items:center; justify-content:center; padding:1rem;">
+  <div id="modal-card" class="card" style="max-width:480px; width:100%; position:relative;">
+    <button id="modal-close" style="
+      position:absolute; top:1rem; right:1rem;
+      background:none; border:none; color:var(--text-muted);
+      font-size:1.2rem; cursor:pointer;">✕</button>
+    <p class="section-title">Booking Detail</p>
+    <h3 id="modal-client" style="margin-bottom:1rem;">—</h3>
+    <div id="modal-body"></div>
+    <hr class="divider" />
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+      <button class="btn btn--sm" id="modal-confirm" style="background:var(--success);color:#fff;">✓ Confirm</button>
+      <button class="btn btn--sm" id="modal-complete" style="background:var(--bg-raised);color:var(--text-secondary);border:1px solid var(--border);">Mark Complete</button>
+      <button class="btn btn--danger btn--sm" id="modal-cancel">✕ Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="app.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

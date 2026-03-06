@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Book appointments online — fast, simple, and beautiful." />
+  <meta name="theme-color" content="#c9a84c" />
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <!-- OG Tags -->
+  <meta property="og:title" content="Bookly — Smart Appointments" />
+  <meta property="og:description" content="Book your appointment in under 2 minutes." />
+  <meta property="og:type" content="website" />
+
+  <title>Bookly — Book an Appointment</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ── Navbar ──────────────────────────────────────────────── -->
+<nav class="navbar">
+  <div class="navbar__inner">
+    <span class="navbar__logo">Book<span>ly</span></span>
+    <div class="navbar__links">
+      <a href="index.html" class="navbar__link navbar__link--active">Book</a>
+      <a href="admin.html" class="navbar__link">Admin ↗</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Hero ────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero__eyebrow fade-up">Online Booking</div>
+    <h1 class="hero__title fade-up">Book your <em>appointment</em><br>in minutes</h1>
+    <p class="hero__subtitle fade-up">No phone calls, no waiting. Select a service, pick a time that works for you, and you're confirmed instantly.</p>
+  </div>
+</section>
+
+<!-- ── Booking Flow ─────────────────────────────────────────── -->
+<main>
+  <div class="container" style="padding-bottom: 5rem;">
+
+    <!-- Stepper -->
+    <div class="stepper fade-up" id="stepper">
+      <div class="step active" id="step-dot-1">
+        <div class="step__dot">1</div>
+        <div class="step__label">Service</div>
+      </div>
+      <div class="step" id="step-dot-2">
+        <div class="step__dot">2</div>
+        <div class="step__label">Date &amp; Time</div>
+      </div>
+      <div class="step" id="step-dot-3">
+        <div class="step__dot">3</div>
+        <div class="step__label">Your Details</div>
+      </div>
+      <div class="step" id="step-dot-4">
+        <div class="step__dot">✓</div>
+        <div class="step__label">Confirm</div>
+      </div>
+    </div>
+
+    <!-- ── STEP 1: Choose Service ───────────────────────────── -->
+    <div id="step-1">
+      <p class="section-title">Choose a service</p>
+      <div id="services-grid" class="grid-2">
+        <!-- Skeleton placeholders -->
+        <div class="skeleton" style="height:110px; border-radius:12px;"></div>
+        <div class="skeleton" style="height:110px; border-radius:12px;"></div>
+        <div class="skeleton" style="height:110px; border-radius:12px;"></div>
+        <div class="skeleton" style="height:110px; border-radius:12px;"></div>
+      </div>
+      <div class="mt-4" style="text-align:right;">
+        <button class="btn btn--primary" id="btn-step1-next" disabled>
+          Continue →
+        </button>
+      </div>
+    </div>
+
+    <!-- ── STEP 2: Date & Time ──────────────────────────────── -->
+    <div id="step-2" class="hidden">
+      <div class="grid-2" style="gap:2rem; align-items:start;">
+
+        <!-- Calendar -->
+        <div>
+          <p class="section-title">Pick a date</p>
+          <div class="card">
+            <div class="calendar-header">
+              <button class="btn btn--ghost btn--sm" id="cal-prev">‹</button>
+              <strong id="cal-month-label" style="font-family:var(--font-display)">—</strong>
+              <button class="btn btn--ghost btn--sm" id="cal-next">›</button>
+            </div>
+            <div class="calendar-grid" id="calendar-grid"></div>
+          </div>
+        </div>
+
+        <!-- Time slots -->
+        <div>
+          <p class="section-title">Pick a time</p>
+          <div id="time-slots-wrapper">
+            <p class="text-muted text-sm">Select a date first to see available slots.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 flex-between">
+        <button class="btn btn--ghost" id="btn-step2-back">← Back</button>
+        <button class="btn btn--primary" id="btn-step2-next" disabled>Continue →</button>
+      </div>
+    </div>
+
+    <!-- ── STEP 3: Client Details ───────────────────────────── -->
+    <div id="step-3" class="hidden">
+      <p class="section-title">Your information</p>
+
+      <!-- Booking summary card -->
+      <div class="card mb-2" id="booking-summary" style="border-left: 3px solid var(--gold-dim);">
+        <div class="flex-between">
+          <div>
+            <p class="text-sm text-muted">Selected service</p>
+            <strong id="summary-service" style="color:var(--text-primary)">—</strong>
+          </div>
+          <div style="text-align:right;">
+            <p class="text-sm text-muted">Date &amp; Time</p>
+            <strong id="summary-datetime" style="color:var(--text-primary)">—</strong>
+          </div>
+          <div style="text-align:right;">
+            <p class="text-sm text-muted">Price</p>
+            <strong id="summary-price" style="color:var(--gold)">—</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label" for="input-name">Full Name *</label>
+            <input class="form-input" type="text" id="input-name" placeholder="Your full name" autocomplete="name" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="input-phone">Phone Number</label>
+            <input class="form-input" type="tel" id="input-phone" placeholder="+1 234 567 8900" autocomplete="tel" />
+          </div>
+        </div>
+        <div class="form-group mt-2">
+          <label class="form-label" for="input-email">Email Address *</label>
+          <input class="form-input" type="email" id="input-email" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <div class="form-group mt-2">
+          <label class="form-label" for="input-notes">Notes (optional)</label>
+          <textarea class="form-textarea" id="input-notes" placeholder="Any special requests or additional information…"></textarea>
+        </div>
+      </div>
+
+      <div class="mt-4 flex-between">
+        <button class="btn btn--ghost" id="btn-step3-back">← Back</button>
+        <button class="btn btn--primary" id="btn-step3-submit">
+          Confirm Booking →
+        </button>
+      </div>
+    </div>
+
+    <!-- ── SUCCESS SCREEN ───────────────────────────────────── -->
+    <div class="success-screen" id="success-screen">
+      <div class="success-icon">✓</div>
+      <h2 style="margin-bottom:0.75rem;">You're all booked!</h2>
+      <p style="margin-bottom:0.5rem;">A confirmation has been recorded for <strong id="success-name"></strong>.</p>
+      <p class="text-sm text-muted" style="margin-bottom:2rem;">
+        Service: <span id="success-service" class="text-gold"></span> &nbsp;·&nbsp;
+        <span id="success-datetime"></span>
+      </p>
+      <button class="btn btn--ghost" onclick="location.reload()">Book another appointment</button>
+    </div>
+
+  </div>
+</main>
+
+<!-- ── Toast Container ──────────────────────────────────────── -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ── PWA Install Banner ───────────────────────────────────── -->
+<div id="install-banner" class="hidden" style="
+  position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+  background: var(--bg-raised); border: 1px solid var(--gold-dim);
+  border-radius: var(--radius-md); padding: 1rem 1.5rem;
+  display: flex; align-items: center; gap: 1.25rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5); z-index: 500;
+  max-width: 360px; width: calc(100% - 3rem);">
+  <span style="font-size:1.5rem;">📲</span>
+  <div style="flex:1;">
+    <p style="font-size:0.85rem; color:var(--text-primary); margin:0;">Add Bookly to your home screen</p>
+    <p class="text-sm text-muted" style="margin:0;">Quick access, works offline</p>
+  </div>
+  <div style="display:flex;gap:0.5rem;">
+    <button class="btn btn--primary btn--sm" id="btn-install">Install</button>
+    <button class="btn btn--ghost btn--sm" id="btn-install-dismiss">✕</button>
+  </div>
+</div>
+
+<!-- Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
