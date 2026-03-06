@@ -4,8 +4,8 @@
 // ============================================================
 
 // ── 1. CONFIG — Replace with your Supabase project values ────
-const SUPABASE_URL = 'https://YOUR_PROJECT_REF.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR_ANON_PUBLIC_KEY';
+const SUPABASE_URL = 'https://ssctiptkwnlzhlemhood.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzY3RpcHRrd25semhsZW1ob29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MzI2MDUsImV4cCI6MjA4ODQwODYwNX0.MSjbgR-dyY1_lMHserMWFvCjm60rQ_hnFpqAZHb66UY';
 
 // ── 2. Init Supabase ─────────────────────────────────────────
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
